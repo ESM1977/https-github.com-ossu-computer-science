@@ -1,5 +1,5 @@
 # part1_grade_tracker.py
-# Student Grade Tracker - Complete Assignment Solution
+# Student Grade Tracker that manages student data, compute results and provides a summary report 
 
 # -------------------- Task 1 --------------------
 raw_students = [
@@ -12,79 +12,90 @@ raw_students = [
 
 cleaned_students = []
 
-print("\n--- Task 1 Output ---")
 for student in raw_students:
-    name = student["name"].strip().title()
+    name = student["name"].strip().title()            
     roll = int(student["roll"])
-    marks = [int(m) for m in student["marks_str"].split(", ")]
+    marks = [int(mark) for mark in student["marks_str"].split(", ")]
 
     valid = all(word.isalpha() for word in name.split())
-    print(f"{name} {'✓ Valid name' if valid else '✗ Invalid name'}")
+    #print(f"{name} {'✓ Valid name' if valid else '✗ Invalid name'}")
 
-    cleaned_students.append({"name": name, "roll": roll, "marks": marks})
+    cleaned_student = {
+        "name": name, 
+        "roll": roll, 
+        "marks": marks}
+    cleaned_students.append(cleaned_student)
 
+    vdata = all(word.isalpha() for word in name.split())
+    datavalid = "✓ Valid name" if vdata else "✗ Invalid name"
+
+    
     print("="*32)
     print(f"Student : {name}")
     print(f"Roll No : {roll}")
     print(f"Marks   : {marks}")
+    print(datavalid)
     print("="*32)
 
 for student in cleaned_students:
     if student["roll"] == 103:
-        print("\nSpecial Output:")
-        print(student["name"].upper())
-        print(student["name"].lower())
+        print("\nStudent with Roll No. 103:")
+        print("Upper Case:", student["name"].upper())
+        print("Lower Case:",student["name"].lower())
 
 
 # -------------------- Task 2 --------------------
-print("\n--- Task 2 Output ---")
+print("\n--- Task 2 : Marks Analysis Using Loops & Conditionals Output ---")
 
 student_name = "Ayesha Sharma"
 subjects = ["Math", "Physics", "CS", "English", "Chemistry"]
 marks = [88, 72, 95, 60, 78]
 
+print(f"\nStudent Name: {student_name}\n")
+
 for i in range(len(subjects)):
-    m = marks[i]
-    if m >= 90:
+    score = marks[i]
+    if 90 <= score <= 100:
         grade = "A+"
-    elif m >= 80:
+    elif 80 <= score <= 89:
         grade = "A"
-    elif m >= 70:
+    elif 70 <= score <= 79:
         grade = "B"
-    elif m >= 60:
+    elif 60 <= score <= 69:
         grade = "C"
     else:
         grade = "F"
-    print(f"{subjects[i]} : {m} → {grade}")
+    print(f"{subjects[i]} : {score} → Grade {grade}")
 
 total = sum(marks)
 avg = round(total / len(marks), 2)
 
-print("\nTotal:", total)
-print("Average:", avg)
 
 max_marks = max(marks)
 min_marks = min(marks)
 
-print("Highest:", subjects[marks.index(max_marks)], max_marks)
-print("Lowest:", subjects[marks.index(min_marks)], min_marks)
+print("\n-----------Analysis-----------")
+print(f"Total Marks: {total}")
+print(f"Average Marks: {avg}")
+print(f"Highest scoring subject: {subjects[marks.index(max_marks)]}, {max_marks}")
+print(f"Lowest scoring subject: {subjects[marks.index(min_marks)]}, {min_marks}")
 
 new_subjects = 0
 
 while True:
-    sub = input("Enter subject name (or 'done'): ")
+    sub = input("\nEnter subject name (or type 'done' to stop): ")
     if sub.lower() == "done":
         break
 
-    marks_input = input("Enter marks: ")
+    marks_input = input(f"Enter marks for {sub} (0-100): ")
 
     if not marks_input.isdigit():
-        print("Invalid input!")
+        print("Warning: Invalid input!")
         continue
 
     m = int(marks_input)
     if m < 0 or m > 100:
-        print("Marks must be between 0–100")
+        print("Warning: Marks must be between 0–100")
         continue
 
     subjects.append(sub)
@@ -96,7 +107,7 @@ print("Updated Average:", round(sum(marks)/len(marks), 2))
 
 
 # -------------------- Task 3 --------------------
-print("\n--- Task 3 Output ---")
+print("\n--- Task 3 : Class Performance Summary Output ---")
 
 class_data = [
     ("Ayesha Sharma",  [88, 72, 95, 60, 78]),
@@ -106,7 +117,7 @@ class_data = [
     ("Sneha Pillai",   [75, 80, 70, 68, 85]),
 ]
 
-print("Name              | Average | Status")
+print("\n Name              | Average | Status")
 print("----------------------------------------")
 
 pass_count = 0
@@ -126,35 +137,35 @@ for name, marks in class_data:
 
     print(f"{name:<18} | {avg:^7} | {status}")
 
-print("\nPassed:", pass_count)
-print("Failed:", fail_count)
+print("\nNumber of students passed:", pass_count)
+print("\nNumber of students failed:", fail_count)
 
 top_avg = max(averages)
 top_index = averages.index(top_avg)
 
-print("Topper:", class_data[top_index][0], top_avg)
+print(f"Class Topper:", class_data[top_index][0], top_avg)
 
 class_avg = round(sum(averages)/len(averages), 2)
 print("Class Average:", class_avg)
 
 
 # -------------------- Task 4 --------------------
-print("\n--- Task 4 Output ---")
+print("\n--- Task 4: String Manipulation Utility Output ---")
 
 essay = "  python is a versatile language. it supports object oriented, functional, and procedural programming. python is widely used in data science and machine learning.  "
 
 clean_essay = essay.strip()
-print("1. Clean:", clean_essay)
+print("\n1. Stripped Essay:\n", clean_essay)
 
-print("\n2. Title Case:", clean_essay.title())
+print("\n2. Title Case:\n", clean_essay.title())
 
-print("\n3. Count:", clean_essay.count("python"))
+print("\n3. Count of python\n:", clean_essay.count("python"))
 
 replaced = clean_essay.replace("python", "Python 🐍")
-print("\n4. Replace:", replaced)
+print("\n4. Replaced Essay:\n", replaced)
 
 sentences = clean_essay.split(". ")
-print("\n5. Sentences:", sentences)
+print("\n5. List of Sentences:\n", sentences)
 
 print("\n6. Numbered Sentences:")
 for i, s in enumerate(sentences, 1):
