@@ -15,4 +15,4 @@ This project is a simple command-line program built using Python. It helps in ma
 - String operations  
 
 ## Author
-Rohini Patil
+Esmita Gupta
