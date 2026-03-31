@@ -52,7 +52,7 @@ sales_log = {
     ],
 }
 
-# ------------------ TASK 1 ------------------
+# ------------------ TASK 1: Explore the Menu ------------------
 
 print("\n--- MENU ---")
 
@@ -68,40 +68,41 @@ for cat in categories:
             print(f"{name:15} ₹{details['price']:6.2f} [{status}]")
 
 # basic stats
-print("\nTotal items:", len(menu))
+print("\nTotal number of items on the menu:", len(menu))
 
 available = sum(1 for i in menu.values() if i["available"])
-print("Available items:", available)
+print("\nTotal number of available items:", available)
 
 # find most expensive item
 exp_item = max(menu.items(), key=lambda x: x[1]["price"])
-print("Most expensive:", exp_item[0], exp_item[1]["price"])
+print("\nMost expensive Item:", exp_item[0], exp_item[1]["price"])
 
 # items below 150
-print("Items under ₹150:")
+print("\nItems priced under ₹150:")
 for name, details in menu.items():
     if details["price"] < 150:
         print(name, details["price"])
 
 
-# ------------------ TASK 2 ------------------
+# ------------------ TASK 2: Cart Operation ------------------
 
 cart = []   # empty cart
 
 # function to add item
 def add_item(name, qty):
     if name not in menu:
-        print("Item not found in menu")
+        print(f"Cannot add '{name}' -> Item not present in menu")
         return
     
     if not menu[name]["available"]:
-        print("Item currently not available")
+        print(f"Cannot add '{name}' -> Item currently not available")
         return
     
     # check if already in cart
     for i in cart:
         if i["item"] == name:
             i["quantity"] += qty
+            print(f"Updated '{name}' quantity to {i['quantity']}.")
             return
     
     # otherwise add new entry
@@ -110,6 +111,7 @@ def add_item(name, qty):
         "quantity": qty,
         "price": menu[name]["price"]
     })
+    print(f"Added '{name}' x {qty} to cart.")
 
 # remove item
 def remove_item(name):
@@ -117,7 +119,16 @@ def remove_item(name):
         if i["item"] == name:
             cart.remove(i)
             return
-    print("Item not in cart")
+    print(f"Cannot remove '{name}' -> Item not found in cart")
+
+# Function to update quantity
+def update_quantity(name, qty):
+    for i in cart:
+        if i["item"] == name:
+            i["quantity"] = new_quantity
+            print(f"Quantity of '{name}' updated to {new_quantity}.")
+            return
+    print(f"Cannot update '{name}' -> Item not found in cart.")
 
 # simulation
 add_item("Paneer Tikka", 2)
@@ -142,41 +153,66 @@ print("GST:", gst)
 print("Total:", subtotal + gst)
 
 
-# ------------------ TASK 3 ------------------
+# -------TASK 3: Inventory Tracker with Deep Copy -------------
 
 # take backup before changes
 inventory_backup = copy.deepcopy(inventory)
 
-# just changing one value to show difference
-inventory["Paneer Tikka"]["stock"] = 5
+print("\n========== Deep Copy Check ==========")
+print("Before manual change:")
+print("Original inventory stock of Paneer Tikka:", inventory["Paneer Tikka"]["stock"])
+print("Backup inventory stock of Paneer Tikka  :", inventory_backup["Paneer Tikka"]["stock"])
 
-print("\nChecking deep copy:")
-print("Current:", inventory["Paneer Tikka"])
-print("Backup :", inventory_backup["Paneer Tikka"])
+# Manually change one stock value in inventory
+inventory["Paneer Tikka"]["stock"] = 9
 
-# restore original
+print("\nAfter manual change in inventory:")
+print("Original inventory stock of Paneer Tikka:", inventory["Paneer Tikka"]["stock"])
+print("Backup inventory stock of Paneer Tikka  :", inventory_backup["Paneer Tikka"]["stock"])
+
+# Restore inventory to original state before continuing
 inventory = copy.deepcopy(inventory_backup)
 
-# deduct stock based on cart
+print("\nAfter restoring inventory:")
+print("Original inventory stock of Paneer Tikka:", inventory["Paneer Tikka"]["stock"])
+print("Backup inventory stock of Paneer Tikka  :", inventory_backup["Paneer Tikka"]["stock"])
+
+# Simulate order fulfilment using final cart from Task 2
+print("\n========== Order Fulfilment ==========")
+
 for i in cart:
-    name = i["item"]
-    qty = i["quantity"]
-    
-    if inventory[name]["stock"] < qty:
-        print(f"Not enough stock for {name}")
-        inventory[name]["stock"] = 0
+    name = entry["item"]
+    qty_needed = entry["quantity"]
+    stock_available = inventory[name]["stock"]
+
+    if stock_available >= qty_needed:
+        inventory[name]["stock"] -= qty_needed
+        print(f"{name}: Deducted {qty_needed} unit(s). Remaining stock = {inventory[name]['stock']}")
     else:
-        inventory[name]["stock"] -= qty
+        print(f"Warning: Insufficient stock for {name}. Needed {qty_needed}, available {stock_available}.")
+        inventory[name]["stock"] = 0
+        print(f"{name}: Deducted only {stock_available} unit(s). Remaining stock = 0")
 
-# check reorder level
-for name, d in inventory.items():
-    if d["stock"] <= d["reorder_level"]:
-        print(f"⚠ Reorder Alert: {name} — Only {d['stock']} left")
+# Print reorder alerts
+print("\n========== Reorder Alerts ==========")
+
+for item, details in inventory.items():
+    if details["stock"] <= details["reorder_level"]:
+        print(f"⚠ Reorder Alert: {item} — Only {details['stock']} unit(s) left (reorder level: {details['reorder_level']})")
+
+# Print final inventory and backup inventory
+print("\n========== Final Inventory ==========")
+for item, details in inventory.items():
+    print(f"{item:<16} Stock: {details['stock']}, Reorder Level: {details['reorder_level']}")
+
+print("\n========== Backup Inventory ==========")
+for item, details in inventory_backup.items():
+    print(f"{item:<16} Stock: {details['stock']}, Reorder Level: {details['reorder_level']}")
 
 
-# ------------------ TASK 4 ------------------
+# -------TASK 4: Daily Sales Log Analysis ----------
 
-print("\n--- SALES ---")
+print("\n============Revenue per day=========")
 
 # function to calculate revenue
 def show_revenue():
@@ -191,7 +227,7 @@ rev = show_revenue()
 
 # best day
 best = max(rev, key=rev.get)
-print("Best day:", best)
+print("\nBest selling day:", best)
 
 # most ordered item
 count = {}
@@ -200,7 +236,7 @@ for orders in sales_log.values():
         for item in o["items"]:
             count[item] = count.get(item, 0) + 1
 
-print("Most ordered item:", max(count, key=count.get))
+print("\nMost ordered item:", max(count, key=count.get))
 
 # adding new day
 sales_log["2025-01-05"] = [
@@ -208,8 +244,23 @@ sales_log["2025-01-05"] = [
     {"order_id": 12, "items": ["Paneer Tikka", "Rasgulla"], "total": 260.0},
 ]
 
-print("\nUpdated revenue:")
-show_revenue()
+print("\n=========Updated revenue per day:===========")
+updated_best_day = ""
+updated_best_revenue = 0
+
+for date, orders in sales_log.items():
+    total = 0
+    for order in orders:
+        total += order["total"]
+    
+    print(f"{date} : ₹{total:.2f}")
+    
+    if total > updated_best_revenue:
+        updated_best_revenue = total
+        updated_best_day = date
+
+print(f"\nUpdated best-selling day: {updated_best_day} — ₹{updated_best_revenue:.2f}")
+
 
 # print all orders with numbering
 print("\nAll Orders:")
