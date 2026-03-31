@@ -13,11 +13,11 @@ raw_students = [
 cleaned_students = []
 
 for student in raw_students:
-    name = student["name"].strip().title()            
-    roll = int(student["roll"])
-    marks = [int(mark) for mark in student["marks_str"].split(", ")]
+    name = student["name"].strip().title()                             # clean the name
+    roll = int(student["roll"])                                        # convert rollno into integer
+    marks = [int(mark) for mark in student["marks_str"].split(", ")]   # convert marks into list of integers
 
-    valid = all(word.isalpha() for word in name.split())
+    valid = all(word.isalpha() for word in name.split())                # validate data
     #print(f"{name} {'✓ Valid name' if valid else '✗ Invalid name'}")
 
     cleaned_student = {
@@ -29,13 +29,15 @@ for student in raw_students:
     vdata = all(word.isalpha() for word in name.split())
     datavalid = "✓ Valid name" if vdata else "✗ Invalid name"
 
-    
+    # print formatted profile card
     print("="*32)
     print(f"Student : {name}")
     print(f"Roll No : {roll}")
     print(f"Marks   : {marks}")
     print(datavalid)
     print("="*32)
+
+# Print in lowercase and uppercase with rollno.
 
 for student in cleaned_students:
     if student["roll"] == 103:
@@ -53,6 +55,8 @@ marks = [88, 72, 95, 60, 78]
 
 print(f"\nStudent Name: {student_name}\n")
 
+# Print each subject with marks and grade
+
 for i in range(len(subjects)):
     score = marks[i]
     if 90 <= score <= 100:
@@ -67,6 +71,8 @@ for i in range(len(subjects)):
         grade = "F"
     print(f"{subjects[i]} : {score} → Grade {grade}")
 
+# Calculate total, average, Higj=hest and lowest
+
 total = sum(marks)
 avg = round(total / len(marks), 2)
 
@@ -80,6 +86,8 @@ print(f"Average Marks: {avg}")
 print(f"Highest scoring subject: {subjects[marks.index(max_marks)]}, {max_marks}")
 print(f"Lowest scoring subject: {subjects[marks.index(min_marks)]}, {min_marks}")
 
+# While looop for adding new subject
+
 new_subjects = 0
 
 while True:
@@ -88,6 +96,8 @@ while True:
         break
 
     marks_input = input(f"Enter marks for {sub} (0-100): ")
+
+    # validation of data
 
     if not marks_input.isdigit():
         print("Warning: Invalid input!")
@@ -116,6 +126,8 @@ class_data = [
     ("Karan Mehta",    [40, 55, 38, 62, 50]),
     ("Sneha Pillai",   [75, 80, 70, 68, 85]),
 ]
+
+# Display of data in the given format
 
 print("\n Name              | Average | Status")
 print("----------------------------------------")
