@@ -1,5 +1,5 @@
 # part3_api_files.py
-# Product Explorer & Error-Resilient Logger
+# File I/O, APIs & Exception Handling
 
 import requests
 from datetime import datetime
@@ -16,54 +16,47 @@ def log_error(function_name, error_type, message):
 # -------------------- TASK 1: FILE I/O --------------------
 
 # Write file
-try:
-    with open("python_notes.txt", "w", encoding="utf-8") as f:
-        f.write("Topic 1: Variables store data. Python is dynamically typed.\n")
-        f.write("Topic 2: Lists are ordered and mutable.\n")
-        f.write("Topic 3: Dictionaries store key-value pairs.\n")
-        f.write("Topic 4: Loops automate repetitive tasks.\n")
-        f.write("Topic 5: Exception handling prevents crashes.\n")
-    print("File written successfully.")
-except Exception as e:
-    log_error("file_write", "Exception", str(e))
+with open("python_notes1.txt", "w", encoding="utf-8") as f:
+  f.write("Topic 1: Variables store data. Python is dynamically typed.\n")
+  f.write("Topic 2: Lists are ordered and mutable.\n")
+  f.write("Topic 3: Dictionaries store key-value pairs.\n")
+  f.write("Topic 4: Loops automate repetitive tasks.\n")
+  f.write("Topic 5: Exception handling prevents crashes.\n")
+  print("File written successfully.")
 
 # Append
-try:
-    with open("python_notes.txt", "a", encoding="utf-8") as f:
-        f.write("Topic 6: Functions help reuse code.\n")
-        f.write("Topic 7: APIs allow communication between systems.\n")
-    print("Lines appended.")
-except Exception as e:
-    log_error("file_append", "Exception", str(e))
+with open("python_notes1.txt", "a", encoding="utf-8") as f:
+  f.write("Topic 6: Functions help reuse code.\n")
+  f.write("Topic 7: APIs allow communication between systems.\n")
+  print("Lines appended.")
 
 # Read file
-try:
-    with open("python_notes.txt", "r", encoding="utf-8") as f:
-        lines = f.readlines()
+with open("python_notes1.txt", "r", encoding="utf-8") as f:
+  lines = f.readlines()
 
-    print("\n--- FILE CONTENT ---")
-    for i, line in enumerate(lines, 1):
-        print(f"{i}. {line.strip()}")
 
-    print("Total lines:", len(lines))
+print("\n--- FILE CONTENT ---")
+for i, line in enumerate(lines, 1):
+  print(f"{i}. {line.strip()}")
 
-    # Keyword search
-    keyword = input("Enter keyword to search: ").lower()
-    found = False
+print("\n Total lines:", len(lines))
 
-    for line in lines:
-        if keyword in line.lower():
-            print(line.strip())
-            found = True
+# Keyword search
+keyword = input("\n Enter keyword to search: ").lower()
+found = False
 
+for line in lines:
+  if keyword in line.lower():
+    print(line.strip())
+    found = True
+    
     if not found:
-        print("No matching lines found.")
-
-except Exception as e:
-    log_error("file_read", "Exception", str(e))
+      print("No matching lines found for the given keyword.")
 
 
 # -------------------- TASK 2: API --------------------
+
+import requests
 
 BASE_URL = "https://dummyjson.com/products"
 
@@ -81,12 +74,17 @@ def fetch_products():
     except requests.exceptions.ConnectionError:
         print("Connection failed.")
         log_error("fetch_products", "ConnectionError", "No connection")
+        return []
+
     except requests.exceptions.Timeout:
         print("Request timed out.")
         log_error("fetch_products", "Timeout", "Server slow")
+        return []
+
     except Exception as e:
         print(e)
         log_error("fetch_products", "Exception", str(e))
+        return []
 
 
 products = fetch_products()
@@ -110,7 +108,16 @@ try:
     for p in data["products"]:
         print(p["title"], "-", p["price"])
 
+except requests.exceptions.ConnectionError:
+    print("Connection failed.")
+    log_error("category_search", "ConnectionError", "No connection")
+
+except requests.exceptions.Timeout:
+    print("Request timed out.")
+    log_error("category_search", "Timeout", "Server slow")
+
 except Exception as e:
+    print(e)
     log_error("category_search", "Exception", str(e))
 
 
@@ -123,14 +130,23 @@ try:
         "description": "Created via API"
     }
 
-    res = requests.post(f"{BASE_URL}/add", json=new_product)
+    res = requests.post(f"{BASE_URL}/add", json=new_product, timeout=5)
     print("\nPOST Response:", res.json())
 
+except requests.exceptions.ConnectionError:
+    print("Connection failed.")
+    log_error("post_request", "ConnectionError", "No connection")
+
+except requests.exceptions.Timeout:
+    print("Request timed out.")
+    log_error("post_request", "Timeout", "Server slow")
+
 except Exception as e:
+    print(e)
     log_error("post_request", "Exception", str(e))
 
 
-# -------------------- TASK 3 --------------------
+# -------------------- TASK 3: Exception Handling  --------------------
 
 # Safe divide
 def safe_divide(a, b):
@@ -142,12 +158,15 @@ def safe_divide(a, b):
         return "Error: Invalid input types"
 
 
+print("\n--------Part A: Guarded Calculator----------")
 print(safe_divide(10, 2))
 print(safe_divide(10, 0))
 print(safe_divide("ten", 2))
 
 
 # Safe file read
+# Part B: Guarded File Reader
+
 def read_file_safe(filename):
     try:
         with open(filename, "r") as f:
@@ -157,12 +176,89 @@ def read_file_safe(filename):
     finally:
         print("File operation attempt complete.")
 
+print("\n----- Part B: Guarded File Reader -----")
+print("\nReading python_notes.txt:")
+content1 = read_file_safe("python_notes.txt")
+if content1 is not None:
+    print(content1)
 
-print(read_file_safe("python_notes.txt"))
-print(read_file_safe("ghost_file.txt"))
+print("\nReading ghost_file.txt:")
+content2 = read_file_safe("ghost_file.txt")
+if content2 is not None:
+    print(content2)
+
+# Part C: Robust API
+
+def fetch_products():
+    try:
+        response = requests.get(f"{BASE_URL}?limit=20", timeout=5)
+        data = response.json()
+
+        print("\n--- PRODUCTS ---")
+        for p in data["products"]:
+            print(f"{p['id']} | {p['title'][:25]:25} | {p['category']} | ${p['price']} | {p['rating']}")
+
+        return data["products"]
+
+    except requests.exceptions.ConnectionError:
+        print("Connection failed. Please check your internet.")
+    except requests.exceptions.Timeout:
+        print("Request timed out. Try again later.")
+    except Exception as e:
+        print(e)
 
 
-# Input validation loop
+print("\n----- Part C: Robust API Calls -----")
+products = fetch_products()
+
+if products:
+    filtered = [p for p in products if p["rating"] >= 4.5]
+    filtered.sort(key=lambda x: x["price"], reverse=True)
+
+    print("\n--- FILTERED PRODUCTS ---")
+    for p in filtered:
+        print(p["title"], p["price"])
+
+
+try:
+    res = requests.get(f"{BASE_URL}/category/laptops", timeout=5)
+    data = res.json()
+
+    print("\n--- LAPTOPS ---")
+    for p in data["products"]:
+        print(p["title"], "-", p["price"])
+
+except requests.exceptions.ConnectionError:
+    print("Connection failed. Please check your internet.")
+except requests.exceptions.Timeout:
+    print("Request timed out. Try again later.")
+except Exception as e:
+    print(e)
+
+
+try:
+    new_product = {
+        "title": "My Custom Product",
+        "price": 999,
+        "category": "electronics",
+        "description": "Created via API"
+    }
+
+    res = requests.post(f"{BASE_URL}/add", json=new_product, timeout=5)
+    print("\nPOST Response:")
+    print(res.json())
+
+except requests.exceptions.ConnectionError:
+    print("Connection failed. Please check your internet.")
+except requests.exceptions.Timeout:
+    print("Request timed out. Try again later.")
+except Exception as e:
+    print(e)
+
+
+
+# Part D: Input Validation tool
+
 while True:
     user = input("\nEnter product ID (1–100) or 'quit': ")
 
@@ -176,7 +272,7 @@ while True:
     pid = int(user)
 
     if pid < 1 or pid > 100:
-        print("Out of range")
+        print("Warning: Product Id should be between 1 to 100")
         continue
 
     try:
@@ -184,35 +280,73 @@ while True:
 
         if res.status_code == 404:
             print("Product not found.")
-            log_error("lookup_product", "HTTPError", f"404 for ID {pid}")
-        else:
+        elif res.status_code == 200:
             data = res.json()
-            print(data["title"], "-", data["price"])
+            print(f"Title: {data['title']}")
+            print(f"Price: ${data['price']}")
+        else:
+            print("Failed to fetch product details.")
 
+    except requests.exceptions.RequestException as e:
+        print(f"Connection failed. Please check your internet: {e}")
+    except requests.exceptions.Timeout:
+        print(f"Request timed out. Try again later")
     except Exception as e:
-        log_error("lookup_product", "Exception", str(e))
+        print(e)
+
+# -------------------- TASK 4: Logging to File  --------------------
+
+import requests
+from datetime import datetime
+
+def log_error(function_name, error_type, message):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open("error_log.txt", "a", encoding="utf-8") as file:
+        file.write(f"[{timestamp}] ERROR in {function_name}: {error_type} — {message}\n")
 
 
-# -------------------- TASK 4 --------------------
-
-# Trigger connection error intentionally
+# 1. Trigger and log a ConnectionError
 try:
     requests.get("https://this-host-does-not-exist-xyz.com/api", timeout=5)
+except requests.exceptions.ConnectionError:
+    print("Connection failed.")
+    log_error("fetch_products", "ConnectionError", "No connection could be made")
+except requests.exceptions.Timeout:
+    print("Request timed out.")
+    log_error("fetch_products", "Timeout", "Request took too long")
 except Exception as e:
-    log_error("test_connection", "ConnectionError", str(e))
+    print(e)
+    log_error("fetch_products", "Exception", str(e))
 
-# Trigger 404 manually
+
+# 2. Trigger and log an HTTP error manually
 try:
-    res = requests.get(f"{BASE_URL}/999")
-    if res.status_code != 200:
-        log_error("test_404", "HTTPError", "Product ID 999 not found")
+    product_id = 999
+    response = requests.get(f"https://dummyjson.com/products/{product_id}", timeout=5)
+
+    if response.status_code != 200:
+        print("Unexpected response received.")
+        log_error(
+            "lookup_product",
+            "HTTPError",
+            f"{response.status_code} Not Found for product ID {product_id}"
+        )
+    else:
+        product = response.json()
+        print("Product found:", product["title"])
+
+except requests.exceptions.ConnectionError:
+    print("Connection failed.")
+    log_error("lookup_product", "ConnectionError", "No connection could be made")
+except requests.exceptions.Timeout:
+    print("Request timed out.")
+    log_error("lookup_product", "Timeout", "Request took too long")
 except Exception as e:
-    log_error("test_404", "Exception", str(e))
+    print(e)
+    log_error("lookup_product", "Exception", str(e))
 
-# Print log file
-print("\n--- ERROR LOG ---")
-try:
-    with open("error_log.txt", "r") as f:
-        print(f.read())
-except:
-    print("No logs yet.")
+
+# 3. Read and print the full log file
+print("\n----- Contents of error_log.txt -----")
+with open("error_log.txt", "r", encoding="utf-8") as file:
+    print(file.read())
